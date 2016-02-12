@@ -65,6 +65,7 @@ if (Meteor.isClient) {
 
 			return false;// prevent the button from reloading the page
 		},
+		
 		"click .js-downvote":function(event){
 
 			// example of how you can access the id for the website in the database
