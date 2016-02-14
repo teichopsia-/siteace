@@ -38,7 +38,11 @@ if (Meteor.isClient) {
 	// helper function that returns all available websites
 	Template.website_list.helpers({
 		websites:function(){
-			return Websites.find({}, {sort: {upvote: -1}});
+			if (Session.get('searching') != true){
+				return Websites.find({}, {sort: {upvote: -1}});
+			} else {
+				return Websites.find({title: Session.get('searched')});
+			}
 		}
 	});
 
@@ -51,7 +55,6 @@ if (Meteor.isClient) {
 			// example of how you can access the id for the website in the database
 			// (this is the data context for the template)
 			var website_id = this._id;
-
 			// put the code in here to add a vote to a website!
 			if (Meteor.userId()){
 				console.log("Up voting website with id " + website_id);
@@ -62,12 +65,10 @@ if (Meteor.isClient) {
 			} else {
 				console.log("please log in to vote");
 			}
-
 			return false;// prevent the button from reloading the page
 		},
-		
-		"click .js-downvote":function(event){
 
+		"click .js-downvote":function(event){
 			// example of how you can access the id for the website in the database
 			// (this is the data context for the template)
 			var website_id = this._id;
@@ -81,7 +82,6 @@ if (Meteor.isClient) {
 			} else {
 				console.log("please log in to vote");
 			}
-
 			return false;// prevent the button from reloading the page
 		}
 	})
@@ -90,6 +90,7 @@ if (Meteor.isClient) {
 		"click .js-toggle-website-form":function(event){
 			$("#website_form").toggle('slow');
 		},
+
 		"submit .js-save-website-form":function(event){
 
 			// here is an example of how to get the url out of the form:
@@ -121,7 +122,15 @@ if (Meteor.isClient) {
 
 			return false;// stop the form submit from reloading the page
 
-		}
+		},
+
+		"blur .js-url": function(event){
+			// event.preventDefault(); I believe this line is not necessary
+				var url = event.target.value;
+				var webContent = Meteor.call('getWebsite', url);
+				console.log(webContent);
+
+		} // end of blur
 	});
 
 	Template.details.events({
@@ -146,10 +155,41 @@ if (Meteor.isClient) {
 		} // end of submit event
 	});
 
+	Template.nav.events({
+		"keyup .js-search, submit form": function(event){
+			event.preventDefault(); // not preventing the enter button event
+
+			setInterval(function(){ // only works the first time.
+				var title = event.target.value;
+				if (event.target.value == ""){
+					Session.set('searching', false);
+				} else {
+					Session.set('searching', true);
+				}
+				Session.set('searched', title);
+			}, 2500);
+
+		} // end of .js search function
+	}); // end of nav.event
+
 }
 
 
 if (Meteor.isServer) {
+
+	Meteor.methods({
+		getWebsite: function(url){
+			HTTP.call('GET', url, {}, function(error, response){
+				if (error){
+					return error
+				} else {
+					return response.content
+				}
+			});
+		}
+	})
+
+
 	// start up function that creates entries in the Websites databases.
   Meteor.startup(function () {
     // code to run on server at startup
