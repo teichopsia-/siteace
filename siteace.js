@@ -46,6 +46,16 @@ if (Meteor.isClient) {
 		}
 	});
 
+	Template.website_form.helpers({
+		title: function(){
+			return Session.get('title');
+		},
+
+		description: function(){
+			return Session.get('description')
+		}
+	});
+
 	/////
 	// template events
 	/////
@@ -127,8 +137,15 @@ if (Meteor.isClient) {
 		"blur .js-url": function(event){
 			// event.preventDefault(); I believe this line is not necessary
 				var url = event.target.value;
-				var webContent = Meteor.call('getWebsite', url);
-				console.log(webContent);
+				Meteor.call('getWebsite', url, function(error, result){
+					if (error){
+						console.log("erroooor");
+					} else {
+						var content = result.content;
+						Session.set('title', $(content).filter('title').text());
+						Session.set('description', $(content).filter("meta[name='description']").attr("content"));
+					}
+				});
 
 		} // end of blur
 	});
@@ -179,15 +196,27 @@ if (Meteor.isServer) {
 
 	Meteor.methods({
 		getWebsite: function(url){
+			try {
+				var result = HTTP.call("GET", url);
+				return result;
+			} catch(error){
+				return false;
+			}
+		}
+
+		/*
+		function(url){
 			HTTP.call('GET', url, {}, function(error, response){
 				if (error){
 					return error
 				} else {
+					console.log(response.content);
 					return response.content
 				}
 			});
-		}
-	})
+		}       // returning undefined on the client side
+		*/
+	});
 
 
 	// start up function that creates entries in the Websites databases.
