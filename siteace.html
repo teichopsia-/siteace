@@ -32,7 +32,7 @@
       </ul>
       <form class="navbar-form navbar-right" role="search">
         <div class="form-group">
-          <input type="text" class="form-control js-search" placeholder="Search by title">
+          <input type="text" class="form-control js-search" placeholder="Search by Title">
         </div>
       </form>
     </div>
@@ -43,7 +43,6 @@
 <template name="details">
   <div class="container">
     <h2>{{description}}</h2>
-    <a href="/">Back</a>
     <!-- add in form -->
     {{#if currentUser}} <!-- if user is logged in -->
       <form class="js-save-comments-form">
@@ -57,7 +56,7 @@
       <li>{{this}}</li>
       {{/each}}
     </ul>
-
+    <a href="/"><button type="button" class="btn btn-primary">Back</button></a>
   </div><!-- end of container -->
 </template>
 
@@ -89,9 +88,21 @@
 <template name="website_list">
 	<ol>
 	{{#each websites}}
-	{{>website_item}}
+	{{> website_item}}
 	{{/each}}
 	</ol>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-md-6">
+  <h3>Notes:</h3>
+  <ul><b>
+    <li>Search is case sensitive</li>
+    <li>Removed autopublish and insecure: Did not check what operations could be done on DB</li>
+    <li>You need to log in to see the up/down/vote buttons and to use other features</li></b>
+  </ul>
+      </div>
+    </div>
+  </div>
 </template>
 
 <!-- template that displays individual website entries -->

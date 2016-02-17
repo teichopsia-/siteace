@@ -146,7 +146,7 @@ if (Meteor.isClient) {
 				var userComment = event.target.comment.value;
 				console.log(comment);
 
-				Websites.update({_id: website_id}, {$push: {comment: userComment}})
+				Meteor.call('userComment', website_id, userComment);
 				console.log(Websites.find({_id: website_id}));
 				// clear the comment field
 				event.target.comment.value = "";
@@ -218,6 +218,10 @@ if (Meteor.isServer) {
 				{_id: website_id},
 				{$inc: {downvote: -1}}
 			);
+		},
+
+		'userComment': function(website_id, userComment){
+			Websites.update({_id: website_id}, {$push: {comment: userComment}});
 		}
 
 		/*
