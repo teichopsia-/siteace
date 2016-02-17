@@ -35,6 +35,9 @@ if (Meteor.isClient) {
 	// template helpers
 	/////
 
+	// Accessing the database
+	Meteor.subscribe('theWebsites');
+
 	// helper function that returns all available websites
 	Template.website_list.helpers({
 		websites:function(){
@@ -68,10 +71,7 @@ if (Meteor.isClient) {
 			// put the code in here to add a vote to a website!
 			if (Meteor.userId()){
 				console.log("Up voting website with id " + website_id);
-				Websites.update(
-					{_id: website_id},
-					{$inc: {upvote: 1}}
-				);
+				Meteor.call('upvoteUpdate', website_id);
 			} else {
 				console.log("please log in to vote");
 			}
@@ -85,10 +85,7 @@ if (Meteor.isClient) {
 			// put the code in here to remove a vote from a website!
 			if (Meteor.userId()){
 				console.log("Down voting website with id " + website_id);
-				Websites.update(
-					{_id: website_id},
-					{$inc: {downvote: -1}}
-				);
+				Meteor.call('downvoteUpdate', website_id);
 			} else {
 				console.log("please log in to vote");
 			}
@@ -102,34 +99,24 @@ if (Meteor.isClient) {
 		},
 
 		"submit .js-save-website-form":function(event){
-
 			// here is an example of how to get the url out of the form:
 			var url = event.target.url.value;
 			var title = event.target.title.value;
 			var description = event.target.description.value;
 			console.log("The url they entered is: "+ url + " description " + description + " "+ new Date());
 			//  put your website saving code in here!
-
 			if (Meteor.userId()){
 				// code as is will submit blank fields. Needs to add a check.
 				// insert additional if statement for blank url, title & description
 				// it can also be done html side, preventing the submission of the form.
-				Websites.insert({
-					title: title,
-					description: description,
-					url: url,
-					createdOn: new Date()
-				});
-
+				Meteor.call('insertWebsite', url, title, description);
 				// deleting the fields on the webpage
 				event.target.url.value = "";
 				event.target.title.value = "";
 				event.target.description.value = "";
-
 			} else {
 				console.log("you need to log in");
 			}
-
 			return false;// stop the form submit from reloading the page
 
 		},
@@ -176,7 +163,7 @@ if (Meteor.isClient) {
 		"keyup .js-search, submit form": function(event){
 			event.preventDefault(); // not preventing the enter button event
 
-			setInterval(function(){ // only works the first time.
+			setTimeout(function(){ // only works the first time.
 				var title = event.target.value;
 				if (event.target.value == ""){
 					Session.set('searching', false);
@@ -184,7 +171,7 @@ if (Meteor.isClient) {
 					Session.set('searching', true);
 				}
 				Session.set('searched', title);
-			}, 2500);
+			}, 3000);
 
 		} // end of .js search function
 	}); // end of nav.event
@@ -194,6 +181,11 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
 
+	Meteor.publish('theWebsites', function(){
+		var currentUserId = this.userId;
+		return Websites.find({}, {sort: {upvote: -1}});
+	});
+
 	Meteor.methods({
 		getWebsite: function(url){
 			try {
@@ -202,6 +194,30 @@ if (Meteor.isServer) {
 			} catch(error){
 				return false;
 			}
+		},
+
+		'insertWebsite': function(title, description, url){
+			var currentUserId = Meteor.userId();
+			Websites.insert({
+				title: title,
+				description: description,
+				url: url,
+				createdOn: new Date()
+			});
+		},
+
+		'upvoteUpdate': function(website_id){
+			Websites.update(
+				{_id: website_id},
+				{$inc: {upvote: 1}}
+			);
+		},
+
+		'downvoteUpdate':function(website_id){
+			Websites.update(
+				{_id: website_id},
+				{$inc: {downvote: -1}}
+			);
 		}
 
 		/*

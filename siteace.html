@@ -14,8 +14,8 @@
 <template name="websites">
   <div class="container">
     {{> website_form}}
-    {{> website_list}}
   </div>
+    {{> website_list}}
 </template>
 
 <template name="nav">
@@ -96,6 +96,9 @@
 
 <!-- template that displays individual website entries -->
 <template name="website_item">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-md-6">
 <li>
 	<a href="{{url}}">{{title}}</a>
   <br>
@@ -105,14 +108,19 @@
     <div>
       Submitted on: {{createdOn.toDateString}}
     </div>
-	<a href="#" class="btn btn-default js-upvote">
-		<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
-	</a>
-	<a href="#" class="btn btn-default js-downvote">
-		<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
-	</a>
-  <a href="/details/{{_id}}">Comments</a>
-	<!-- you will be putting your up and down vote buttons in here! -->
+    {{#if currentUser}}
+    	<a href="#" class="btn btn-default js-upvote">
+    		<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+    	</a>
+    	<a href="#" class="btn btn-default js-downvote">
+    		<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+    	</a>
+    {{/if}}
+      <a href="/details/{{_id}}">Comments</a>
+    	<!-- you will be putting your up and down vote buttons in here! -->
 </li>
-<hr>
+  <hr>
+      </div>
+    </div>
+  </div>
 </template>
